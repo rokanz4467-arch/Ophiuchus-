@@ -623,8 +623,8 @@
 
         <div class="form-card">
           <div class="form-header">
-            <button class="active" onclick="showLogin()">Login</button>
-            <button onclick="showRegister()">Register</button>
+            <button class="active" onclick="showLoginForm()">Login</button>
+            <button onclick="showRegisterForm()">Register</button>
           </div>
 
           <!-- LOGIN FORM -->
@@ -638,9 +638,9 @@
               <i class="fas fa-lock"></i>
               <input type="password" id="login-password" placeholder="Password">
             </div>
-            <button onclick="handleLogin()">Login</button>
+            <button onclick="handleLoginClick()">Login</button>
             <div class="form-footer">
-              Belum punya akun? <a onclick="showRegister()">Daftar</a>
+              Belum punya akun? <a onclick="showRegisterForm()">Daftar</a>
             </div>
           </div>
 
@@ -659,9 +659,9 @@
               <i class="fas fa-lock"></i>
               <input type="password" id="register-password" placeholder="Password">
             </div>
-            <button onclick="handleRegister()">Daftar</button>
+            <button onclick="handleRegisterClick()">Daftar</button>
             <div class="form-footer">
-              Sudah punya akun? <a onclick="showLogin()">Login</a>
+              Sudah punya akun? <a onclick="showLoginForm()">Login</a>
             </div>
           </div>
         </div>
@@ -683,16 +683,21 @@
         </div>
       </div>
       
-      <div id="chat-container"></div>
+      <div id="chat-container">
+        <div class="message bot">
+          <div>Selamat datang! Silakan masukkan API Key Groq Anda untuk memulai chat.</div>
+          <div class="timestamp">System</div>
+        </div>
+      </div>
       
       <!-- INPUT AREA - TOOLS DI DALAM BAR -->
       <div class="input-area">
         <div class="input-wrapper">
-          <input type="text" id="user-input" placeholder="Ketik pesan..." disabled>
+          <input type="text" id="user-input" placeholder="Ketik pesan...">
           <div class="input-actions">
             <button class="input-btn" onclick="attachImage()"><i class="fas fa-image"></i></button>
             <button class="input-btn" onclick="recordAudio()"><i class="fas fa-microphone"></i></button>
-            <button id="send-btn" onclick="sendMessage()" disabled><i class="fas fa-arrow-up"></i></button>
+            <button id="send-btn" onclick="sendMessage()"><i class="fas fa-arrow-up"></i></button>
           </div>
         </div>
       </div>
@@ -703,73 +708,69 @@
   <div class="modal" id="apiModal">
     <div class="modal-content">
       <h2>🔑 Masukkan API Key</h2>
-      <p>Dapatkan API key gratis dari <a href="https://console.groq.com" target="_blank" style="color: #b06aff;">console.groq.com</a></p>
-      <input type="password" id="apiKeyInput" placeholder="gsk_..." value="">
+      <p>Dapatkan API key gratis dari console.groq.com</p>
+      <input type="password" id="apiKeyInput" placeholder="gsk_...">
       <button onclick="saveApiKey()">Simpan & Mulai Chat</button>
       <button class="modal-close" onclick="closeApiModal()">Tutup</button>
     </div>
   </div>
 
   <script>
-    // ==================== STATE ====================
-    let apiKey = localStorage.getItem('groq_api_key') || '';
-    let isTyping = false;
-
-    // ==================== CEK API KEY ====================
-    function checkApiKey() {
-      const indicator = document.getElementById('apiIndicator');
-      const input = document.getElementById('user-input');
-      const sendBtn = document.getElementById('send-btn');
-      
-      if (apiKey) {
-        indicator.innerHTML = '<i class="fas fa-check-circle"></i> API Key Active';
-        indicator.classList.add('active');
-        input.disabled = false;
-        sendBtn.disabled = false;
-      } else {
-        indicator.innerHTML = '<i class="fas fa-key"></i> Set API Key';
-        indicator.classList.remove('active');
-        input.disabled = true;
-        sendBtn.disabled = true;
-      }
-    }
-
-    // ==================== MODAL API ====================
-    window.openApiModal = function() {
-      document.getElementById('apiModal').style.display = 'flex';
-    };
-
-    window.closeApiModal = function() {
-      document.getElementById('apiModal').style.display = 'none';
-    };
-
-    window.saveApiKey = function() {
-      const newKey = document.getElementById('apiKeyInput').value.trim();
-      if (!newKey) {
-        alert('API Key tidak boleh kosong');
-        return;
-      }
-      if (!newKey.startsWith('gsk_')) {
-        alert('API Key Groq harus dimulai dengan "gsk_"');
-        return;
-      }
-      
-      apiKey = newKey;
-      localStorage.setItem('groq_api_key', apiKey);
-      closeApiModal();
-      checkApiKey();
-      addMessage('API Key tersimpan! Silakan mulai chat.', false);
-    };
-
-    // ==================== FORM TOGGLE ====================
-    window.showLogin = function() {
+    // ==================== FUNGSI LOGIN/REGISTER (PASTI JALAN) ====================
+    function showLoginForm() {
       document.getElementById('login-form').classList.add('active');
       document.getElementById('register-form').classList.remove('active');
       document.querySelectorAll('.form-header button')[0].classList.add('active');
       document.querySelectorAll('.form-header button')[1].classList.remove('active');
-    };
+    }
 
-    window.showRegister = function() {
+    function showRegisterForm() {
       document.getElementById('register-form').classList.add('active');
       document.getElementById('login-form').classList.remove('active');
-      document.querySelectorAll('.form-header button')[1].classList.add('active'
+      document.querySelectorAll('.form-header button')[1].classList.add('active');
+      document.querySelectorAll('.form-header button')[0].classList.remove('active');
+    }
+
+    function handleLoginClick() {
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+      
+      if (!username || !password) {
+        alert('Username dan password harus diisi!');
+        return;
+      }
+      
+      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('chat-section').style.display = 'flex';
+    }
+
+    function handleRegisterClick() {
+      const name = document.getElementById('register-name').value;
+      const email = document.getElementById('register-email').value;
+      const password = document.getElementById('register-password').value;
+      
+      if (!name || !email || !password) {
+        alert('Semua field harus diisi!');
+        return;
+      }
+      
+      alert('Registrasi berhasil! Silakan login.');
+      showLoginForm();
+    }
+
+    function logout() {
+      document.getElementById('chat-section').style.display = 'none';
+      document.getElementById('login-section').style.display = 'flex';
+    }
+
+    // ==================== FUNGSI MODAL API ====================
+    function openApiModal() {
+      document.getElementById('apiModal').style.display = 'flex';
+    }
+
+    function closeApiModal() {
+      document.getElementById('apiModal').style.display = 'none';
+    }
+
+    function saveApiKey() {
+      const key = document.getElementById('apiKeyInput').
